@@ -18,8 +18,12 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
-        description: "Development server",
+        url: "https://jewellery-mzfe.onrender.com/api",
+        description: "Render server",
+      },
+      {
+        url: "http://localhost:3000/api-docs",
+        description: "Local server",
       },
     ],
     components: {
