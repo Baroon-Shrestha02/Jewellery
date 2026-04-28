@@ -6,6 +6,79 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     UserResponse:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "64f1b2c3d4e5f6a7b8c9d0e1"
+ *         firstname:
+ *           type: string
+ *           example: "John"
+ *         lastname:
+ *           type: string
+ *           example: "Doe"
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john.doe@example.com"
+ *         phone:
+ *           type: string
+ *           example: "+9779800000000"
+ *         role:
+ *           type: string
+ *           enum: [user, admin]
+ *           example: "user"
+ *         profileImage:
+ *           type: string
+ *           nullable: true
+ *           example: "https://example.com/image.jpg"
+ *
+ *     LoginRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john.doe@example.com"
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: "Secret@123"
+ *
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: "success"
+ *         message:
+ *           type: string
+ *           example: "Login successfully."
+ *         token:
+ *           type: string
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         user:
+ *           $ref: '#/components/schemas/UserResponse'
+ *
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: "error"
+ *         message:
+ *           type: string
+ *           example: "Invalid credentials."
+ */
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
  *     summary: Login a user

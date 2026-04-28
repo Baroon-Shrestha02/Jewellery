@@ -13,6 +13,102 @@ const router = express.Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     ProductImage:
+ *       type: object
+ *       properties:
+ *         public_id:
+ *           type: string
+ *           example: "jewellery/abc123xyz"
+ *         url:
+ *           type: string
+ *           example: "https://res.cloudinary.com/demo/image/upload/abc123xyz.jpg"
+ *
+ *     Product:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: "64f1b2c3d4e5f6a7b8c9d0e1"
+ *         name:
+ *           type: string
+ *           example: "Gold Necklace"
+ *         karat:
+ *           type: number
+ *           example: 22
+ *         weight:
+ *           type: number
+ *           example: 15.5
+ *         category:
+ *           type: string
+ *           enum: [gold, silver]
+ *           example: "gold"
+ *         subCategory:
+ *           type: string
+ *           example: "Necklace"
+ *         image:
+ *           $ref: '#/components/schemas/ProductImage'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-01-15T10:30:00.000Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-01-15T10:30:00.000Z"
+ *
+ *     Category:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: "64f1b2c3d4e5f6a7b8c9d0e2"
+ *         name:
+ *           type: string
+ *           example: "gold"
+ *         subCategories:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["Necklace", "Ring", "Bracelet"]
+ *
+ *     CreateProductRequest:
+ *       type: object
+ *       required:
+ *         - name
+ *         - karat
+ *         - weight
+ *         - category
+ *         - subCategory
+ *         - image
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: "Gold Necklace"
+ *         karat:
+ *           type: number
+ *           minimum: 1
+ *           example: 22
+ *         weight:
+ *           type: number
+ *           minimum: 0.01
+ *           example: 15.5
+ *         category:
+ *           type: string
+ *           enum: [gold, silver]
+ *           example: "gold"
+ *         subCategory:
+ *           type: string
+ *           example: "Necklace"
+ *         image:
+ *           type: string
+ *           format: binary
+ *           description: Product image file (jpg, png, etc.)
+ */
+
+/**
+ * @swagger
  * /products/:
  *   get:
  *     summary: Get all products

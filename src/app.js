@@ -19,7 +19,15 @@ const swaggerPath = join(__dirname, "swagger-output.json");
 
 if (existsSync(swaggerPath)) {
   const swaggerFile = JSON.parse(readFileSync(swaggerPath, "utf-8"));
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerFile, {
+      swaggerOptions: {
+        defaultModelsExpandDepth: -1, // 👈 hides the Schemas section
+      },
+    }),
+  );
 } else {
   console.warn("⚠️  swagger-output.json not found. Run: npm run swagger");
 }
