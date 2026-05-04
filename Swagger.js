@@ -22,7 +22,7 @@ const options = {
         description: "Render server",
       },
       {
-        url: "http://localhost:3000/api-docs",
+        url: "http://localhost:3000/api",
         description: "Local server",
       },
     ],
