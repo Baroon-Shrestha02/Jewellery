@@ -5,6 +5,7 @@ import GlobalErrorHandler from "./Utils/GlobalErrorHandler.js";
 import AppError from "./Middlewares/AppError.js";
 import ProductRoutes from "./Routes/ProductRoutes.js";
 import AuthRoutes from "./Routes/AuthRoutes.js";
+import GalleryRoutes from "./Routes/GalleryRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import { readFileSync, existsSync } from "fs";
 import { fileURLToPath } from "url";
@@ -60,6 +61,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", ProductRoutes);
 app.use("/api/auth", AuthRoutes);
+app.use("/api/gallery", GalleryRoutes);
 
 app.all("/{*splat}", (req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl} on this server`, 404));
