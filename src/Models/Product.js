@@ -7,6 +7,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product name is required"],
       trim: true,
     },
+    description: {
+      type: String,
+      required: [true, "Product description is required"],
+      trim: true,
+    },
     karat: {
       type: Number,
       required: [true, "Karat is required"],

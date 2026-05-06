@@ -4,7 +4,7 @@ import Product from "../Models/Product.js";
 import { uploadImages } from "../Utils/ImageUploader.js";
 
 export const createProduct = AsyncErrorHandler(async (req, res) => {
-  const { name, karat, weight, category, subCategory } = req.body;
+  const { name, description, karat, weight, category, subCategory } = req.body;
 
   const updatedCategory = await Category.findOneAndUpdate(
     { name: category },
@@ -21,6 +21,7 @@ export const createProduct = AsyncErrorHandler(async (req, res) => {
   const product = await Product.create({
     name,
     karat,
+    description,
     weight,
     category,
     subCategory,
@@ -82,7 +83,7 @@ export const getSubCategories = AsyncErrorHandler(async (req, res) => {
 
 export const updateProduct = AsyncErrorHandler(async (req, res) => {
   const { id } = req.params;
-  const { name, karat, weight, category, subCategory } = req.body;
+  const { name, description, karat, weight, category, subCategory } = req.body;
 
   const product = await Product.findById(id);
   if (!product) {
@@ -122,6 +123,7 @@ export const updateProduct = AsyncErrorHandler(async (req, res) => {
   // Build update object — only include fields that were actually sent
   const updates = {};
   if (hasValue(name)) updates.name = name;
+  if (hasValue(description)) updates.description = description;
   if (hasValue(karat)) updates.karat = karat;
   if (hasValue(weight)) updates.weight = weight;
   if (hasValue(category)) updates.category = category;
