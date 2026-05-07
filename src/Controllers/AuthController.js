@@ -55,3 +55,49 @@ export const getLoggedUser = AsyncErrorHandler(async (req, res, next) => {
     user: userResponse(req.user),
   });
 });
+
+export const changepassword = AsyncErrorHandler(async (req, res, next) => {
+  const { email, password, confirmPassword } = req.body;
+
+  if (!email || !password || !confirmPassword) {
+    return next(
+      new AppError("Email, password and confirm password are required.", 400),
+    );
+  }
+
+  if (password !== confirmPassword) {
+    return next(
+      new AppError("Password and confirm password do not match.", 400),
+    );
+  }
+
+  if (password.length < 6) {
+    return next(
+      new AppError("Password must be at least 6 characters long.", 400),
+    );
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    return next(new AppError("User with this email does not exist.", 404));
+  }
+
+  const isSamePassword = await bcrypt.compare(password, user.password);
+
+  if (isSamePassword) {
+    return next(
+      new AppError("New password cannot be the same as old password.", 400),
+    );
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  user.password = hashedPassword;
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Password changed successfully.",
+  });
+});

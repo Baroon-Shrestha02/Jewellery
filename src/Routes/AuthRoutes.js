@@ -1,6 +1,11 @@
 import express from "express";
 import { protect } from "../Middlewares/VerifyUser.js";
-import { getLoggedUser, login, logout } from "../Controllers/AuthController.js";
+import {
+  changepassword,
+  getLoggedUser,
+  login,
+  logout,
+} from "../Controllers/AuthController.js";
 
 const router = express.Router();
 
@@ -189,5 +194,100 @@ router.get("/me", protect, getLoggedUser);
  *               message: "You are not logged in. Please log in to get access."
  */
 router.post("/logout", protect, logout);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ChangePasswordRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *         - confirmPassword
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john.doe@example.com"
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: "NewPassword@123"
+ *         confirmPassword:
+ *           type: string
+ *           format: password
+ *           example: "NewPassword@123"
+ *
+ *     ChangePasswordResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: "success"
+ *         message:
+ *           type: string
+ *           example: "Password changed successfully."
+ */
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     description: Allows an authenticated user to change password by providing email, password, and confirm password.
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ChangePasswordRequest'
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ChangePasswordResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               missingFields:
+ *                 value:
+ *                   status: "error"
+ *                   message: "Email, password and confirm password are required."
+ *               passwordMismatch:
+ *                 value:
+ *                   status: "error"
+ *                   message: "Password and confirm password do not match."
+ *               samePassword:
+ *                 value:
+ *                   status: "error"
+ *                   message: "New password cannot be the same as old password."
+ *       401:
+ *         description: Unauthorized — missing or invalid token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: User with this email does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               status: "error"
+ *               message: "User with this email does not exist."
+ */
+router.post("/change-password", protect, changepassword);
 
 export default router;
