@@ -35,7 +35,6 @@ export const createProduct = AsyncErrorHandler(async (req, res) => {
     message: "Product created successfully",
     data: {
       product,
-      category: updatedCategory,
     },
   });
 });
