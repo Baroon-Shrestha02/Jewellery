@@ -1,10 +1,12 @@
+// ProductController.js
+
 import AsyncErrorHandler from "../Middlewares/AsyncErrorHandler.js";
 import Category from "../Models/Category.js";
 import Product from "../Models/Product.js";
 import { uploadImages } from "../Utils/ImageUploader.js";
 
 export const createProduct = AsyncErrorHandler(async (req, res) => {
-  const { name, description, karat, weight, category, subCategory } = req.body;
+  const { name, karat, weight, category, subCategory } = req.body;
 
   const updatedCategory = await Category.findOneAndUpdate(
     { name: category },
@@ -21,7 +23,6 @@ export const createProduct = AsyncErrorHandler(async (req, res) => {
   const product = await Product.create({
     name,
     karat,
-    description,
     weight,
     category,
     subCategory,
@@ -39,7 +40,13 @@ export const createProduct = AsyncErrorHandler(async (req, res) => {
 });
 
 export const getProducts = AsyncErrorHandler(async (req, res) => {
-  const products = await Product.find().sort({ createdAt: -1 });
+  const { category, subCategory } = req.query;
+
+  const filter = {};
+  if (category) filter.category = category.toLowerCase();
+  if (subCategory) filter.subCategory = subCategory.toLowerCase();
+
+  const products = await Product.find(filter).sort({ createdAt: -1 });
 
   res.status(200).json({
     status: "success",
@@ -64,7 +71,7 @@ export const getCategories = AsyncErrorHandler(async (req, res) => {
 export const getSubCategories = AsyncErrorHandler(async (req, res) => {
   const { category } = req.params;
 
-  const categoryDoc = await Category.findOne({ name: category });
+  const categoryDoc = await Category.findOne({ name: category.toLowerCase() });
 
   if (!categoryDoc) {
     return res.status(404).json({
@@ -83,7 +90,7 @@ export const getSubCategories = AsyncErrorHandler(async (req, res) => {
 
 export const updateProduct = AsyncErrorHandler(async (req, res) => {
   const { id } = req.params;
-  const { name, description, karat, weight, category, subCategory } = req.body;
+  const { name, karat, weight, category, subCategory } = req.body;
 
   const product = await Product.findById(id);
   if (!product) {
@@ -92,17 +99,14 @@ export const updateProduct = AsyncErrorHandler(async (req, res) => {
       .json({ status: "fail", message: "Product not found" });
   }
 
-  // Only upload new image if provided, otherwise keep existing
   let image = product.image;
   if (req.files?.image) {
     image = await uploadImages(req.files.image);
   }
 
-  // Helper to check if a field was actually sent with a value
   const hasValue = (value) =>
     value !== undefined && value !== null && value !== "";
 
-  // Only upsert category if category or subCategory is being changed
   if (hasValue(category) || hasValue(subCategory)) {
     await Category.findOneAndUpdate(
       { name: hasValue(category) ? category : product.category },
@@ -120,10 +124,8 @@ export const updateProduct = AsyncErrorHandler(async (req, res) => {
     );
   }
 
-  // Build update object — only include fields that were actually sent
   const updates = {};
   if (hasValue(name)) updates.name = name;
-  if (hasValue(description)) updates.description = description;
   if (hasValue(karat)) updates.karat = karat;
   if (hasValue(weight)) updates.weight = weight;
   if (hasValue(category)) updates.category = category;
