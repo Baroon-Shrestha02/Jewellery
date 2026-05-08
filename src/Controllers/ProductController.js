@@ -107,6 +107,10 @@ export const updateProduct = AsyncErrorHandler(async (req, res) => {
   const hasValue = (value) =>
     value !== undefined && value !== null && value !== "";
 
+  // Track old values before updating
+  const oldCategory = product.category;
+  const oldSubCategory = product.subCategory;
+
   if (hasValue(category) || hasValue(subCategory)) {
     await Category.findOneAndUpdate(
       { name: hasValue(category) ? category : product.category },
@@ -138,6 +142,24 @@ export const updateProduct = AsyncErrorHandler(async (req, res) => {
     runValidators: true,
   });
 
+  // If subcategory or category changed, check if old subcategory is now empty
+  const subChanged = hasValue(subCategory) && subCategory !== oldSubCategory;
+  const catChanged = hasValue(category) && category !== oldCategory;
+
+  if (subChanged || catChanged) {
+    const remaining = await Product.countDocuments({
+      category: oldCategory,
+      subCategory: oldSubCategory,
+    });
+
+    if (remaining === 0) {
+      await Category.findOneAndUpdate(
+        { name: oldCategory },
+        { $pull: { subCategories: oldSubCategory } },
+      );
+    }
+  }
+
   res.status(200).json({
     status: "success",
     message: "Product updated successfully",
@@ -155,6 +177,20 @@ export const deleteProduct = AsyncErrorHandler(async (req, res) => {
       status: "fail",
       message: "Product not found",
     });
+  }
+
+  // Check if any other products still use this subcategory
+  const remaining = await Product.countDocuments({
+    category: product.category,
+    subCategory: product.subCategory,
+  });
+
+  // If none remain, remove the subcategory from the category
+  if (remaining === 0) {
+    await Category.findOneAndUpdate(
+      { name: product.category },
+      { $pull: { subCategories: product.subCategory } },
+    );
   }
 
   res.status(200).json({
