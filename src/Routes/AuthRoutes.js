@@ -1,13 +1,39 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { protect } from "../Middlewares/VerifyUser.js";
 import {
   changepassword,
+  forgotPassword,
   getLoggedUser,
   login,
   logout,
+  resetPassword,
+  verifyOtp,
 } from "../Controllers/AuthController.js";
 
 const router = express.Router();
+
+const forgotLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "fail",
+    message: "Too many password reset requests. Please try again later.",
+  },
+});
+
+const verifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "fail",
+    message: "Too many verification attempts. Please try again later.",
+  },
+});
 
 /**
  * @swagger
@@ -289,5 +315,82 @@ router.post("/logout", protect, logout);
  *               message: "User with this email does not exist."
  */
 router.post("/change-password", protect, changepassword);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset OTP via email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: OTP sent if account exists
+ */
+router.post("/forgot-password", forgotLimiter, forgotPassword);
+
+/**
+ * @swagger
+ * /auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP and receive short-lived reset token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, otp]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified, reset token returned
+ */
+router.post("/verify-otp", verifyLimiter, verifyOtp);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password using reset token from verify-otp
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [resetToken, password, confirmPassword]
+ *             properties:
+ *               resetToken:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               confirmPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ */
+router.post("/reset-password", resetPassword);
 
 export default router;
